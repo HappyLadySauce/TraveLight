@@ -2,7 +2,7 @@ name: TraveLight
 services:
   postgresql:
     image: postgres:16
-    container_name: beehive-postgres
+    container_name: travelight-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: TraveLight
@@ -21,11 +21,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - beehive-network
+      - travelight-network
 
   redis:
     image: redis:8-alpine
-    container_name: beehive-redis
+    container_name: travelight-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     ports:
@@ -38,8 +38,8 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - beehive-network
+      - travelight-network
 
 networks:
-  beehive-network:
+  travelight-network:
     driver: bridge

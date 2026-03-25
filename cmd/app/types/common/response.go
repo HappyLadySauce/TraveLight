@@ -19,8 +19,12 @@ func Success(c *gin.Context, obj interface{}) {
 }
 
 // Fail generate fail response
-func Fail(c *gin.Context, err error) {
-	Response(c, err, nil)
+func Fail(c *gin.Context, code int, message string) {
+	c.JSON(http.StatusOK, BaseResponse{
+		Code: code,
+		Msg:  message,
+		Data: nil,
+	})
 }
 
 // Response generate response

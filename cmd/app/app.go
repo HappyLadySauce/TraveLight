@@ -13,6 +13,7 @@ import (
 
 	"github.com/HappyLadySauce/TraveLight/cmd/app/options"
 	"github.com/HappyLadySauce/TraveLight/cmd/app/router"
+	"github.com/HappyLadySauce/TraveLight/cmd/app/routes/craw"
 	"github.com/HappyLadySauce/TraveLight/cmd/app/svc"
 )
 
@@ -75,24 +76,22 @@ func run(ctx context.Context, serviceCtx *svc.ServiceContext) error {
 }
 
 func serve(ctx context.Context, svcCtx *svc.ServiceContext) error {
+	craw.RegisterRoutes(svcCtx)
+
 	address := fmt.Sprintf("%s:%d", svcCtx.Config.ServerOptions.BindAddress, svcCtx.Config.ServerOptions.BindPort)
 	klog.InfoS("Listening and serving on", "address", address)
 
-	// 使用 router.NewServer 创建 http.Server 以支持优雅关闭
 	srv := router.NewServer(address)
 
-	// 在 goroutine 中启动服务器
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			klog.Fatal(err)
 		}
 	}()
 
-	// 等待 context 取消信号（优雅关闭）
 	<-ctx.Done()
 	klog.InfoS("Shutting down server...")
 
-	// 使用超时 context 进行优雅关闭
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
