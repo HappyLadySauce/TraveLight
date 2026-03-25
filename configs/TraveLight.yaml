@@ -1,0 +1,22 @@
+server:
+    bindAddress: 0.0.0.0 # 绑定的不安全 IP 地址，设置为 0.0.0.0 表示使用全部网络接口，默认为 127.0.0.1
+    bindPort: 8081      # 提供非安全认证的监听端口，默认为 8081
+
+# 数据库配置
+db:
+    host: 127.0.0.1         # 数据库主机地址
+    port: 5432              # 数据库端口
+    username: TraveLight  # 数据库用户名
+    password: TraveLight  # 数据库密码
+    database: TraveLight  # 数据库名称
+    charset: utf8mb4        # 数据库字符集
+    timeZone: Asia/Shanghai # 时区设置
+    parseTime: true         # 是否解析时间
+    loc: Local              # 时间位置
+
+# Redis 配置
+redis:
+    redisHost: 127.0.0.1:6379       # Redis 主机地址
+    redisPass: ""               # Redis 密码，无密码时留空
+    redisDB: 0                  # Redis 数据库索引
+

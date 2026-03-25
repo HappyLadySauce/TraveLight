@@ -1,0 +1,34 @@
+info:
+  contact: {}
+paths:
+  /livez:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务是否存活
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: livez
+          schema:
+            type: string
+      summary: 健康检查
+      tags:
+      - health
+  /readyz:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务是否就绪
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: readyz
+          schema:
+            type: string
+      summary: 就绪检查
+      tags:
+      - health
+swagger: "2.0"
