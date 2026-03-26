@@ -15,6 +15,61 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/crawl/start": {
+            "post": {
+                "description": "启动景点数据爬虫任务，异步执行",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "crawl"
+                ],
+                "summary": "启动爬虫任务",
+                "responses": {
+                    "200": {
+                        "description": "爬虫任务已启动",
+                        "schema": {
+                            "$ref": "#/definitions/v1.StartCrawlResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "爬虫正在运行中",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/crawl/status": {
+            "get": {
+                "description": "获取当前爬虫任务的运行状态和上次执行结果",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "crawl"
+                ],
+                "summary": "获取爬虫状态",
+                "responses": {
+                    "200": {
+                        "description": "获取状态成功",
+                        "schema": {
+                            "$ref": "#/definitions/v1.StatusCrawlResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/livez": {
             "get": {
                 "description": "检查服务是否存活",
@@ -58,6 +113,33 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "v1.StartCrawlResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.StatusCrawlResponse": {
+            "type": "object",
+            "properties": {
+                "is_running": {
+                    "type": "boolean"
+                },
+                "last_count": {
+                    "type": "integer"
+                },
+                "last_error": {
+                    "type": "string"
+                },
+                "last_run": {
+                    "type": "string"
                 }
             }
         }

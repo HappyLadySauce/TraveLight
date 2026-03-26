@@ -9,10 +9,7 @@ db:
     username: TraveLight  # 数据库用户名
     password: TraveLight  # 数据库密码
     database: TraveLight  # 数据库名称
-    charset: utf8mb4        # 数据库字符集
     timeZone: Asia/Shanghai # 时区设置
-    parseTime: true         # 是否解析时间
-    loc: Local              # 时间位置
 
 # Redis 配置
 redis:

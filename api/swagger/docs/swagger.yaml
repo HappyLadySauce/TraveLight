@@ -1,6 +1,59 @@
+definitions:
+  v1.StartCrawlResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  v1.StatusCrawlResponse:
+    properties:
+      is_running:
+        type: boolean
+      last_count:
+        type: integer
+      last_error:
+        type: string
+      last_run:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /api/v1/crawl/start:
+    post:
+      consumes:
+      - application/json
+      description: 启动景点数据爬虫任务，异步执行
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 爬虫任务已启动
+          schema:
+            $ref: '#/definitions/v1.StartCrawlResponse'
+        "409":
+          description: 爬虫正在运行中
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 启动爬虫任务
+      tags:
+      - crawl
+  /api/v1/crawl/status:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前爬虫任务的运行状态和上次执行结果
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取状态成功
+          schema:
+            $ref: '#/definitions/v1.StatusCrawlResponse'
+      summary: 获取爬虫状态
+      tags:
+      - crawl
   /livez:
     get:
       consumes:
