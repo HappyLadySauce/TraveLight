@@ -16,19 +16,19 @@ import (
 
 const (
 	baseURL      = "https://chongqing.cncn.com/jingdian/"
-	detailURLFmt = "https://chongqing.cncn.com/jingdian/%s"
+	detailURLFmt = "https://chongqing.cncn.com/jingdian/%s/"
 	maxPages     = 22
 )
 
 type Crawler struct {
-	db            *gorm.DB
-	collector     *colly.Collector
+	db              *gorm.DB
+	collector       *colly.Collector
 	detailCollector *colly.Collector
-	attractions   map[string]*Attraction
-	mu            sync.RWMutex
-	errors        []error
-	errorMu       sync.Mutex
-	rateLimiter   *time.Ticker
+	attractions     map[string]*Attraction
+	mu              sync.RWMutex
+	errors          []error
+	errorMu         sync.Mutex
+	rateLimiter     *time.Ticker
 }
 
 type CrawlerOption func(*Crawler)
@@ -80,7 +80,7 @@ func (c *Crawler) createListCollector() *colly.Collector {
 		c.recordError(fmt.Errorf("列表页面请求失败 [%s]: %w", r.Request.URL.String(), err))
 	})
 
-	col.OnHTML("div.plist ul li", func(e *colly.HTMLElement) {
+	col.OnHTML("div.city_spots_list ul li", func(e *colly.HTMLElement) {
 		attraction := c.parseListItem(e)
 		if attraction != nil && attraction.Name != "" {
 			c.mu.Lock()
@@ -103,6 +103,7 @@ func (c *Crawler) createListCollector() *colly.Collector {
 func (c *Crawler) createDetailCollector() *colly.Collector {
 	col := colly.NewCollector(
 		colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
+		colly.AllowURLRevisit(),
 	)
 
 	col.SetRequestTimeout(30 * time.Second)
@@ -133,24 +134,24 @@ func (c *Crawler) createDetailCollector() *colly.Collector {
 func (c *Crawler) parseListItem(e *colly.HTMLElement) *Attraction {
 	attraction := &Attraction{}
 
-	attraction.Name = strings.TrimSpace(e.ChildText("div.info h3 a"))
+	attraction.Name = strings.TrimSpace(e.ChildText("div.title b"))
 
 	if attraction.Name == "" {
-		attraction.Name = strings.TrimSpace(e.ChildText("h3 a"))
+		attraction.Name = strings.TrimSpace(e.ChildAttr("a.pic img", "alt"))
 	}
 
-	attraction.ImageURL = e.ChildAttr("div.img a img", "src")
+	attraction.ImageURL = e.ChildAttr("a.pic img", "data-original")
 	if attraction.ImageURL == "" {
-		attraction.ImageURL = e.ChildAttr("a img", "src")
+		attraction.ImageURL = e.ChildAttr("a img", "data-original")
 	}
 
 	if attraction.ImageURL != "" && !strings.HasPrefix(attraction.ImageURL, "http") {
 		attraction.ImageURL = "https:" + attraction.ImageURL
 	}
 
-	href := e.ChildAttr("div.img a", "href")
+	href := e.ChildAttr("a.pic", "href")
 	if href == "" {
-		href = e.ChildAttr("h3 a", "href")
+		href = e.ChildAttr("a", "href")
 	}
 
 	re := regexp.MustCompile(`/jingdian/([^/\.]+)`)
@@ -158,6 +159,8 @@ func (c *Crawler) parseListItem(e *colly.HTMLElement) *Attraction {
 	if len(matches) > 1 {
 		attraction.SourceURL = matches[1]
 	}
+
+	klog.V(1).InfoS("解析列表项", "name", attraction.Name, "sourceURL", attraction.SourceURL, "imageURL", attraction.ImageURL)
 
 	return attraction
 }
@@ -171,11 +174,14 @@ func (c *Crawler) parseDetailPage(e *colly.HTMLElement) {
 	}
 	sourceID := matches[1]
 
+	klog.V(1).InfoS("解析详情页面", "sourceID", sourceID, "mapKeys", len(c.attractions))
+
 	c.mu.RLock()
 	attraction, exists := c.attractions[sourceID]
 	c.mu.RUnlock()
 
 	if !exists {
+		klog.V(1).InfoS("详情页面未找到对应列表项，创建新记录", "sourceID", sourceID)
 		attraction = &Attraction{
 			SourceURL: sourceID,
 		}
