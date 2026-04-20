@@ -15,6 +15,7 @@ type Options struct {
 	*options.ServerOptions   `mapstructure:"server"`
 	*options.DatabaseOptions `mapstructure:"db"`
 	*options.RedisOptions    `mapstructure:"redis"`
+	*options.AuthOptions     `mapstructure:"auth"`
 }
 
 // NewOptions creates a new Options struct
@@ -24,6 +25,7 @@ func NewOptions() *Options {
 		ServerOptions:   options.NewServerOptions(),
 		DatabaseOptions: options.NewDatabaseOptions(),
 		RedisOptions:    options.NewRedisOptions(),
+		AuthOptions:     options.NewAuthOptions(),
 	}
 }
 
@@ -45,6 +47,9 @@ func (o *Options) AddFlags(fs *pflag.FlagSet, basename string) *flag.NamedFlagSe
 
 	redisFS := nfs.FlagSet("Redis")
 	o.RedisOptions.AddFlags(redisFS)
+
+	authFS := nfs.FlagSet("Auth")
+	o.AuthOptions.AddFlags(authFS)
 
 	// add the flags to the main Command
 	// 添加标志到主命令

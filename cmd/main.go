@@ -15,6 +15,13 @@ const (
 	basename = "TraveLight"
 )
 
+// @title TraveLight API
+// @version 1.0
+// @description TraveLight 后端 API 文档。
+// @BasePath /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	// 创建可取消的根 context
 	ctx, cancel := context.WithCancel(context.Background())

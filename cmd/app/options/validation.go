@@ -10,6 +10,7 @@ func (o *Options) Validate() error {
 	errs = append(errs, o.ServerOptions.Validate())
 	errs = append(errs, o.DatabaseOptions.Validate())
 	errs = append(errs, o.RedisOptions.Validate())
+	errs = append(errs, o.AuthOptions.Validate())
 
 	return errors.Join(errs...)
 }

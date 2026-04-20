@@ -1,4 +1,79 @@
+basePath: /
 definitions:
+  common.BaseResponse:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  v1.CreateCommentRequest:
+    properties:
+      body:
+        maxLength: 1000
+        minLength: 1
+        type: string
+    required:
+    - body
+    type: object
+  v1.LoginRequest:
+    properties:
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      username:
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  v1.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  v1.RegisterRequest:
+    properties:
+      confirm_password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        - unknown
+        type: string
+      name:
+        maxLength: 64
+        minLength: 1
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      phone:
+        maxLength: 20
+        minLength: 11
+        type: string
+      username:
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - confirm_password
+    - gender
+    - name
+    - password
+    - phone
+    - username
+    type: object
   v1.StartCrawlResponse:
     properties:
       message:
@@ -17,7 +92,298 @@ definitions:
     type: object
 info:
   contact: {}
+  description: TraveLight 后端 API 文档。
+  title: TraveLight API
+  version: "1.0"
 paths:
+  /api/v1/attractions/{id}/view:
+    post:
+      consumes:
+      - application/json
+      description: 对指定景点执行一次浏览计数加一
+      parameters:
+      - description: 景点ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: 景点浏览计数
+      tags:
+      - ranking
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用用户名和密码登录并获取 access/refresh token
+      parameters:
+      - description: 登录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      summary: 用户登录
+      tags:
+      - auth
+  /api/v1/auth/me:
+    get:
+      consumes:
+      - application/json
+      description: 基于 access token 获取当前登录用户信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取当前用户
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: 使用 refresh token 重新签发 access/refresh token
+      parameters:
+      - description: 刷新令牌请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      summary: 刷新令牌
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 注册新用户账号
+      parameters:
+      - description: 注册信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      summary: 用户注册
+      tags:
+      - auth
+  /api/v1/comments/{commentId}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除当前登录用户自己的评论
+      parameters:
+      - description: 评论ID
+        in: path
+        name: commentId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除评论
+      tags:
+      - comment
+  /api/v1/contents/{type}/{id}/comments:
+    get:
+      consumes:
+      - application/json
+      description: 查询文章或景点下的评论列表
+      parameters:
+      - description: 内容类型(article|attraction)
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: 内容ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      summary: 查询评论列表
+      tags:
+      - comment
+    post:
+      consumes:
+      - application/json
+      description: 为文章或景点发布评论
+      parameters:
+      - description: 内容类型(article|attraction)
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: 内容ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 评论内容
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/v1.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: 发表评论
+      tags:
+      - comment
   /api/v1/crawl/start:
     post:
       consumes:
@@ -54,6 +420,79 @@ paths:
       summary: 获取爬虫状态
       tags:
       - crawl
+  /api/v1/rankings/attractions/hot:
+    get:
+      consumes:
+      - application/json
+      description: 按景点点击量从高到低返回排行榜
+      parameters:
+      - default: 20
+        description: 返回数量上限(1-100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      summary: 热门景点排行
+      tags:
+      - ranking
+  /api/v1/search:
+    get:
+      consumes:
+      - application/json
+      description: 根据关键词在文章与景点中执行 PostgreSQL 全文搜索
+      parameters:
+      - description: 搜索关键词
+        in: query
+        name: q
+        required: true
+        type: string
+      - default: all
+        description: 搜索类型(all|article|attraction)
+        in: query
+        name: type
+        type: string
+      - default: 1
+        description: 页码(>=1)
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量(1-50)
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.BaseResponse'
+      summary: 全文搜索
+      tags:
+      - search
   /livez:
     get:
       consumes:
@@ -84,4 +523,9 @@ paths:
       summary: 就绪检查
       tags:
       - health
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

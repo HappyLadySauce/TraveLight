@@ -13,8 +13,9 @@ type Attraction struct {
 	Name        string         `gorm:"type:varchar(255);not null;comment:景点名称" json:"name"`
 	ImageURL    string         `gorm:"type:varchar(500);comment:景点图片URL" json:"image_url"`
 	Description string         `gorm:"type:text;comment:景点详情介绍" json:"description"`
-	SourceURL   string         `gorm:"type:varchar(500);comment:数据来源URL" json:"source_url"`
+	SourceURL   string         `gorm:"type:varchar(500);uniqueIndex;comment:数据来源URL" json:"source_url"`
 	PageNumber  int            `gorm:"type:integer;comment:所在页码" json:"page_number"`
+	ViewCount   int64          `gorm:"type:bigint;not null;default:0;comment:浏览量" json:"view_count"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`

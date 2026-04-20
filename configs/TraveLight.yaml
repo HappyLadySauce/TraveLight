@@ -17,3 +17,9 @@ redis:
     redisPass: ""               # Redis 密码，无密码时留空
     redisDB: 0                  # Redis 数据库索引
 
+# 认证配置
+auth:
+    jwtSecret: "change_me_in_production"
+    accessTokenTTLMinute: 30
+    refreshTokenTTLHour: 168
+

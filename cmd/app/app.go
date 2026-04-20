@@ -13,8 +13,13 @@ import (
 
 	"github.com/HappyLadySauce/TraveLight/cmd/app/options"
 	"github.com/HappyLadySauce/TraveLight/cmd/app/router"
+	"github.com/HappyLadySauce/TraveLight/cmd/app/routes/auth"
+	"github.com/HappyLadySauce/TraveLight/cmd/app/routes/comment"
 	"github.com/HappyLadySauce/TraveLight/cmd/app/routes/craw"
+	"github.com/HappyLadySauce/TraveLight/cmd/app/routes/ranking"
+	"github.com/HappyLadySauce/TraveLight/cmd/app/routes/search"
 	"github.com/HappyLadySauce/TraveLight/cmd/app/svc"
+	"github.com/HappyLadySauce/TraveLight/pkg/model"
 )
 
 func NewAPICommand(ctx context.Context, basename string) *cobra.Command {
@@ -76,7 +81,15 @@ func run(ctx context.Context, serviceCtx *svc.ServiceContext) error {
 }
 
 func serve(ctx context.Context, svcCtx *svc.ServiceContext) error {
+	if err := model.AutoMigrate(svcCtx.DB); err != nil {
+		return fmt.Errorf("database migration failed: %w", err)
+	}
+
+	auth.RegisterRoutes(svcCtx)
+	comment.RegisterRoutes(svcCtx)
 	craw.RegisterRoutes(svcCtx)
+	ranking.RegisterRoutes(svcCtx)
+	search.RegisterRoutes(svcCtx)
 
 	address := fmt.Sprintf("%s:%d", svcCtx.Config.ServerOptions.BindAddress, svcCtx.Config.ServerOptions.BindPort)
 	klog.InfoS("Listening and serving on", "address", address)
